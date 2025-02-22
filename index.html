@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>CNAB Visualizer</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tacit-css@1.8.1/dist/tacit-css.min.css"/>
+  <style>
+    body {
+      background-color: #222222;
+      color: #bbbbbc;
+    }
+    h1 {
+      color: #bbbbbc;
+    }
+    textarea {
+      background-color: #2e3434;
+      color: #eeeeec;
+    }
+    th {
+      width: 512px;
+    }
+    .invisible {
+      display: none;
+    }
+    .error {
+      color: #ef2929;
+    }
+    .cnab-table {
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>CNAB Visualizer</h1>
+  <p>Insira o conteúdo do seu arquivo CNAB abaixo e clique em visualizar (somente o padrão Bradesco 400 é suportado):</p>
+  <textarea id="cnab-content" name="cnab-content" rows="9" cols="256"></textarea>
+  <button onclick="viewCnabContent()">Visualizar</button>
+
+  <div id="error-area" class="invisible">
+    <p id="error-msg" class="error"></p>
+  </div>
+
+  <div id="rem-area" class="invisible cnab-table">
+    <table id="rem-header-table">
+      <tr>
+        <th>Identificação do registro</th>
+        <th>Identificação do Arquivo-Remessa</th>
+        <th>Literal Remessa</th>
+        <th>Código de Serviço</th>
+        <th>Literal de Serviço</th>
+        <th>Código da Empresa</th>
+        <th>Nome da Empresa</th>
+        <th>Número do Bradesco na câmera</th>
+        <th>Nome do banco</th>
+        <th>Data da gravação do arquivo</th>
+        <th>Branco</th>
+        <th>Identificação do Sistema</th>
+        <th>N sequencial de remessa</th>
+        <th>Branco</th>
+        <th>N sequencial do registro</th>
+      </tr>
+    </table>
+
+    <table id="rem-occurrence-table">
+      <tr>
+        <th>Identificação do registro</th>
+        <th>Agência de débito</th>
+        <th>Dígito da agência de débito</th>
+        <th>Razão da conta-corrente</th>
+        <th>Conta-corrente</th>
+        <th>Dígito da conta-corrente</th>
+        <th>Identificação da empresa</th>
+        <th>N controle do participante</th>
+        <th>Código do banco</th>
+        <th>Campo de multa</th>
+        <th>Percentual de multa</th>
+        <th>Identificação do título no banco</th>
+        <th>Dígito de autoconferência</th>
+        <th>Desconto bonificação por dia</th>
+        <th>Condição para emissão da papeleta</th>
+        <th>Ident. se emite boleto para débito auto.</th>
+        <th>Identificação da operação do banco</th>
+        <th>Indicador rateio crédito</th>
+        <th>Endereçamento para aviso do débito auto.</th>
+        <th>Quantidade de pagamentos</th>
+        <th>Identificação da ocorrência</th>
+        <th>N do documento</th>
+        <th>Data do vencimento do título</th>
+        <th>Valor do título</th>
+        <th>Banco encarregado da cobrança</th>
+        <th>Agência depositária</th>
+        <th>Espécie de título</th>
+        <th>Identificação</th>
+        <th>Data da emissão do título</th>
+        <th>1 instrução</th>
+        <th>2 instrução</th>
+        <th>Valor a ser cobrado por dia de atraso</th>
+        <th>Data limite p/ concessão do desconto</th>
+        <th>Valor do desconto</th>
+        <th>Valor do IOF</th>
+        <th>Valor do abatimento</th>
+        <th>Identificação do tipo de inscrição do pagador</th>
+        <th>N inscrição do pagador</th>
+        <th>Nome do pagador</th>
+        <th>Endereço completo</th>
+        <th>1 mensagem</th>
+        <th>CEP</th>
+        <th>Sufixo do CEP</th>
+        <th>Beneficiário final ou 2 mensagem</th>
+        <th>N sequencial do registro</th>
+      </tr>
+    </table>
+
+    <table id="rem-trailer-table">
+      <tr>
+        <th>Identificação do registro</th>
+        <th>Branco</th>
+        <th>N sequencial do registro</th>
+      </tr>
+    </table>
+  </div>
+
+  <div id="ret-area" class="invisible cnab-table">
+    <table id="ret-header-table">
+      <tr>
+        <th>Identificação do registro</th>
+        <th>Identificação do Arquivo-Retorno</th>
+        <th>Literal Retorno</th>
+        <th>Código de Serviço</th>
+        <th>Literal de Serviço</th>
+        <th>Código da Empresa</th>
+        <th>Nome da Empresa</th>
+        <th>Número do Bradesco na câmera</th>
+        <th>Nome do banco</th>
+        <th>Data da gravação do arquivo</th>
+        <th>Densidade da gravação</th>
+        <th>N aviso bancário</th>
+        <th>Branco</th>
+        <th>Data do crédito</th>
+        <th>Branco</th>
+        <th>N sequencial do registro</th>
+      </tr>
+    </table>
+
+    <table id="ret-occurrence-table">
+      <tr>
+        <th>Identificação do registro</th>
+        <th>Tipo de inscrição da empresa</th>
+        <th>N inscrição da empresa</th>
+        <th>Zeros</th>
+        <th>Identificação da empresa</th>
+        <th>N controle do participante</th>
+        <th>Zeros</th>
+        <th>Identificação do título no banco</th>
+        <th>Uso do banco</th>
+        <th>Uso do banco</th>
+        <th>Indicador de rateio</th>
+        <th>Pagamento parcial</th>
+        <th>Carteira</th>
+        <th>Identificação de ocorrência</th>
+        <th>Data ocorrência no banco</th>
+        <th>N do documento</th>
+        <th>Identificação do título no banco</th>
+        <th>Data vencimento do título</th>
+        <th>Valor do título</th>
+        <th>Banco cobrador</th>
+        <th>Agência cobradora</th>
+        <th>Espécie de título</th>
+        <th>Despesas de cobrança</th>
+        <th>Outras despesas</th>
+        <th>Juros operação em atraso</th>
+        <th>IOF devido</th>
+        <th>Abatimento concedido</th>
+        <th>Desconto concedido</th>
+        <th>Valor pago</th>
+        <th>Juros de mora</th>
+        <th>Outros créditos</th>
+        <th>Brancos</th>
+        <th>Motivo do código de ocorrência 25 ou 19</th>
+        <th>Data do crédito</th>
+        <th>Origem pagamento</th>
+        <th>Brancos</th>
+        <th>Cheque bradesco</th>
+        <th>Motivos das rejeições</th>
+        <th>Brancos</th>
+        <th>Número do cartório</th>
+        <th>Número do protocolo</th>
+        <th>Brancos</th>
+        <th>N sequencial do registro</th>
+      </tr>
+    </table>
+
+    <table id="ret-trailer-table">
+      <tr>
+        <th>Identificação do registro</th>
+        <th>Identificação do retorno</th>
+        <th>Identificação tipo de registro</th>
+        <th>Código do banco</th>
+        <th>Brancos</th>
+        <th>Quantidade de títulos em cobrança</th>
+        <th>Valor total em cobrança</th>
+        <th>N do aviso bancário</th>
+        <th>Brancos</th>
+        <th>Quantidade de registros - Ocorrência 02</th>
+        <th>Valor dos registros - Ocorrência 02</th>
+        <th>Valor dos registros - Ocorrência 06</th>
+        <th>Quantidade de registros - Ocorrência 06</th>
+        <th>Valor dos registros - Ocorrência 06</th>
+        <th>Quantidade de registros - Ocorrência 09 e 10</th>
+        <th>Valor dos registros - Ocorrência 09 e 10</th>
+        <th>Quantidade de registros - Ocorrência 13</th>
+        <th>Valor dos registros - Ocorrência 13</th>
+        <th>Quantidade de registros - Ocorrência 14</th>
+        <th>Valor dos registros - Ocorrência 14</th>
+        <th>Quantidade de registros - Ocorrência 12</th>
+        <th>Valor dos registros - Ocorrência 12</th>
+        <th>Quantidade de registros - Ocorrência 19</th>
+        <th>Valor dos registros - Ocorrência 19</th>
+        <th>Brancos</th>
+        <th>Valor total dos rateios</th>
+        <th>Quantidade total dos rateios</th>
+        <th>Brancos</th>
+        <th>N sequencial do registro</th>
+      </tr>
+    </table>
+  </div>
+
+  <script>
+    function viewCnabContent() {
+      reset();
+      const content = document.getElementById("cnab-content").value;
+      if (content.match(/remessa/i)) {
+        displayRem(content);
+      } else if (content.match(/retorno/i)) {
+        displayRet(content);
+      } else {
+        displayError();
+      }
+    }
+
+    function reset() {
+      document.getElementById("error-area").style.display = "none";
+      document.getElementById("rem-area").style.display = "none";
+      document.getElementById("ret-area").style.display = "none";
+      const matches = document.querySelectorAll("tr[destroy-on-reset]");
+      for (var i = 0; i < matches.length; i++)
+        matches[i].remove();
+    }
+
+    function displayError() {
+      document.getElementById("error-msg").innerHTML = "Não foi possível interpretar o conteúdo inserido. Certifique-se que ele é válido e segue o padrão Bradesco 400.";
+      document.getElementById("error-area").style.display = "block";
+    }
+
+
+    function displayRem(content) {
+      document.getElementById("rem-area").style.display = "block";
+
+      var table, tableRow, currentLine;
+      const contentLines = content.split("\n");
+      for (var i = 0; i < contentLines.length; i++) {
+        currentLine = contentLines[i];
+        if (currentLine[0] === "0") {
+          table = document.getElementById("rem-header-table");
+          tableRow = table.insertRow(-1);
+          tableRow.setAttribute("destroy-on-reset", true);
+          insertRemHeader(currentLine, tableRow);
+        } else if (currentLine[0] == "1") {
+          table = document.getElementById("rem-occurrence-table");
+          tableRow = table.insertRow(-1);
+          tableRow.setAttribute("destroy-on-reset", true);
+          insertRemOccurrence(currentLine, tableRow);
+        } else if (currentLine[0] == "9") {
+          table = document.getElementById("rem-trailer-table");
+          tableRow = table.insertRow(-1);
+          tableRow.setAttribute("destroy-on-reset", true);
+          insertRemTrailer(currentLine, tableRow);
+        }
+      }
+    }
+
+    function insertRemHeader(currentLine, tableRow) {
+      // Identificação do registro
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(0, 1);
+      // Identificação do Arquivo-Remessa
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(1, 2);
+      // Literal Remessa
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(2, 9);
+      // Código de Serviço
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(9, 11);
+      // Literal de Serviço
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(11, 26);
+      // Código da Empresa
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(26, 46);
+      // Nome da Empresa
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(46, 76);
+      // Número do Bradesco na câmera
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(76, 79);
+      // Nome do banco
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(79, 94);
+      // Data da gravação do arquivo
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(94, 100);
+      // Branco
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(100, 108);
+      // Identificação do Sistema
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(108, 110);
+      // N sequencial de remessa
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(111, 117);
+      // Branco
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(117, 394);
+      // N sequencial do registro
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(394, 400);
+    }
+
+    function insertRemOccurrence(currentLine, tableRow) {
+      // Identificação do registro
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(0, 1);
+      // Agência de débito
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(1, 6);
+      // Dígito da agência de débito
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(7, 8);
+      // Razão da conta-corrente
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(7, 12);
+      // Conta-corrente
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(12, 19);
+      // Dígito da conta-corrente
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(19, 20);
+      // Identificação da empresa
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(20, 37);
+      // N controle do participante
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(37, 62);
+      // Código do banco
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(62, 65);
+      // Campo de multa
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(65, 66);
+      // Percentual de multa
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(66, 70);
+      // Identificação do título no banco
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(70, 81);
+      // Dígito de autoconferência
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(81, 82);
+      // Desconto bonificação por dia
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(82, 92);
+      // Condição para emissão da papeleta
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(92, 93);
+      // Ident. se emite boleto para débito auto.
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(93, 94);
+      // Identificação da operação do banco
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(94, 104);
+      // Indicador rateio crédito
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(104, 105);
+      // Endereçamento para aviso do débito auto.
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(105, 106);
+      // Quantidade de pagamentos
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(106, 108);
+      // Identificação da ocorrência
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(108, 110);
+      // N do documento
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(110, 120);
+      // Data do vencimento do título
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(120, 126);
+      // Valor do título
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(126, 139);
+      // Banco encarregado da cobrança
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(139, 142);
+      // Agência depositária
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(142, 147);
+      // Espécie de título
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(147, 149);
+      // Identificação
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(149, 150);
+      // Data da emissão do título
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(150, 156);
+      // 1 instrução
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(156, 158);
+      // 2 instrução
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(158, 160);
+      // Valor a ser cobrado por dia de atraso
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(160, 173);
+      // Data limite p/ concessão do desconto
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(173, 179);
+      // Valor do desconto
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(179, 192);
+      // Valor do IOF
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(192, 205);
+      // Valor do abatimento
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(205, 218);
+      // Identificação do tipo de inscrição do pagador
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(218, 220);
+      // N inscrição do pagador
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(220, 234);
+      // Nome do pagador
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(234, 274);
+      // Endereço completo
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(274, 314);
+      // 1 mensagem
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(314, 326);
+      // CEP
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(326, 331);
+      // Sufixo do CEP
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(331, 334);
+      // Beneficiário final ou 2 mensagem
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(334, 394);
+      // N sequencial do registro
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(334, 400);
+    }
+
+    function insertRemTrailer(currentLine, tableRow) {
+      // Identificação do registro
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(0, 1);
+      // Branco
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(1, 394);
+      // N sequencial do registro
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(394, 400);
+    }
+
+    function displayRet(content) {
+      document.getElementById("ret-area").style.display = "block";
+
+      var table, tableRow, currentLine;
+      const contentLines = content.split("\n");
+      for (var i = 0; i < contentLines.length; i++) {
+        currentLine = contentLines[i];
+        if (currentLine[0] === "0") {
+          table = document.getElementById("ret-header-table");
+          tableRow = table.insertRow(-1);
+          tableRow.setAttribute("destroy-on-reset", true);
+          insertRetHeader(currentLine, tableRow);
+        } else if (currentLine[0] == "1") {
+          table = document.getElementById("ret-occurrence-table");
+          tableRow = table.insertRow(-1);
+          tableRow.setAttribute("destroy-on-reset", true);
+          insertRetOccurrence(currentLine, tableRow);
+        } else if (currentLine[0] == "9") {
+          table = document.getElementById("ret-trailer-table");
+          tableRow = table.insertRow(-1);
+          tableRow.setAttribute("destroy-on-reset", true);
+          insertRetTrailer(currentLine, tableRow);
+        }
+      }
+    }
+
+    function insertRetHeader(currentLine, tableRow) {
+      // Identificação do registro
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(0, 1);
+      // Identificação do Arquivo-Retorno
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(1, 2);
+      // Literal Retorno
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(2, 9);
+      // Código de Serviço
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(9, 11);
+      // Literal de Serviço
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(11, 26);
+      // Código da Empresa
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(26, 46);
+      // Nome da Empresa
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(46, 76);
+      // Número do Bradesco na câmera
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(76, 79);
+      // Nome do banco
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(79, 94);
+      // Data da gravação do arquivo
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(94, 100);
+      // Densidade da gravação
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(100, 108);
+      // N aviso bancário
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(108, 113);
+      // Branco
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(113, 379);
+      // Data do crédito
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(379, 385);
+      // Branco
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(385, 394);
+      // N sequencial do registro
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(394, 400);
+    }
+
+    function insertRetOccurrence(currentLine, tableRow) {
+      // Identificação do registro
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(0, 1);
+      // Tipo de inscrição da empresa
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(1, 3);
+      // N inscrição da empresa
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(3, 17);
+      // Zeros
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(17, 20);
+      // Identificação da empresa
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(20, 37);
+      // N controle do participante
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(37, 62);
+      // Zeros
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(62, 70);
+      // Identificação do título no banco
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(70, 82);
+      // Uso do banco
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(82, 92);
+      // Uso do banco
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(92, 104);
+      // Indicador de rateio
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(104, 105);
+      // Pagamento parcial
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(105, 107);
+      // Carteira
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(107, 108);
+      // Identificação de ocorrência
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(108, 110);
+      // Data ocorrência no banco
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(110, 116);
+      // N do documento
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(116, 126);
+      // Identificação do título no banco
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(126, 146);
+      // Data vencimento do título
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(146, 152);
+      // Valor do título
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(152, 165);
+      // Banco cobrador
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(165, 168);
+      // Agência cobradora
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(168, 173);
+      // Espécie de título
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(173, 175);
+      // Despesas de cobrança
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(175, 188);
+      // Outras despesas
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(188, 201);
+      // Juros operação em atraso
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(201, 214);
+      // IOF devido
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(214, 227);
+      // Abatimento concedido
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(227, 240);
+      // Desconto concedido
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(240, 253);
+      // Valor pago
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(253, 266);
+      // Juros de mora
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(266, 279);
+      // Outros créditos
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(279, 292);
+      // Brancos
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(292, 294);
+      // Motivo do código de ocorrência 25 ou 19
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(294, 295);
+      // Data do crédito
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(295, 301);
+      // Origem pagamento
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(301, 304);
+      // Brancos
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(304, 314);
+      // Cheque bradesco
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(314, 318);
+      // Motivos das rejeições
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(318, 328);
+      // Brancos
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(328, 368);
+      // Número do cartório
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(368, 370);
+      // Número do protocolo
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(370, 380);
+      // Brancos
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(380, 394);
+      // N sequencial do registro
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(394, 400);
+    }
+
+    function insertRetTrailer(currentLine, tableRow) {
+      // Identificação do registro
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(0, 1);
+      // Identificação do retorno
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(1, 2);
+      // Identificação tipo de registro
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(2, 4);
+      // Código do banco
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(4, 7);
+      // Brancos
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(7, 17);
+      // Quantidade de títulos em cobrança
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(17, 25);
+      // Valor total em cobrança
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(25, 39);
+      // N do aviso bancário
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(39, 47);
+      // Brancos
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(47, 57);
+      // Quantidade de registros - Ocorrência 02
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(57, 62);
+      // Valor dos registros - Ocorrência 02
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(62, 74);
+      // Valor dos registros - Ocorrência 06
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(74, 86);
+      // Quantidade de registros - Ocorrência 06
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(86, 91);
+      // Valor dos registros - Ocorrência 06
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(91, 103);
+      // Quantidade de registros - Ocorrência 09 e 10
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(103, 108);
+      // Valor dos registros - Ocorrência 09 e 10
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(108, 120);
+      // Quantidade de registros - Ocorrência 13
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(120, 125);
+      // Valor dos registros - Ocorrência 13
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(125, 137);
+      // Quantidade de registros - Ocorrência 14
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(137, 142);
+      // Valor dos registros - Ocorrência 14
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(142, 154);
+      // Quantidade de registros - Ocorrência 12
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(154, 159);
+      // Valor dos registros - Ocorrência 12
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(159, 171);
+      // Quantidade de registros - Ocorrência 19
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(171, 176);
+      // Valor dos registros - Ocorrência 19
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(176, 188);
+      // Brancos
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(188, 362);
+      // Valor total dos rateios
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(362, 377);
+      // Quantidade total dos rateios
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(377, 385);
+      // Brancos
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(385, 394);
+      // N sequencial do registro
+      tableRow.insertCell(-1).innerHTML = currentLine.slice(394, 400);
+    }
+  </script>
+</body>
+</html>
